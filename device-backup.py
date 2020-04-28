@@ -111,10 +111,31 @@ def create_backup(connection, backup_file_path, hostname):
         # if successfully done
         return True
 
-    except Error:
+    except Exception:
         # if there was an error
         print('Error! Unable to backup device ' + hostname)
         return False
+
+def get_cdp(connection,hostname):
+    # Get CDP status and count of neighbors
+    result = {
+        'status': 'unknown',
+        'peers': 0
+    }
+    try:
+        connection.enable()
+        output = connection.send_command('sh cdp neig det')
+        print(output)
+        print('-*-' * 10)
+        print()
+        if 'CDP is not enabled' in output:
+            result['status'] = 'OFF'
+        else:
+            result['status'] = 'ON'
+            result['peers'] = output.count('Device ID:')
+    except Exception:
+        print('Error! Unable get CDP service info on' + hostname)
+    return result
 
 def process_target(device,timestamp):
     # This function will be run by each of the processes in parallel
@@ -122,17 +143,17 @@ def process_target(device,timestamp):
     #  - connects to the device,
     #  - gets a backup file name and a hostname for this device,
     #  - creates a backup for this device
+    #  - collect cdp information
     #  - terminates connection
     #  - compares a backup to the golden configuration and logs the delta
     # Requires connection object and a timestamp string as an input
 
     connection = connect_to_device(device)
     
-    backup_file_path = get_backup_file_path(device['hostname'], timestamp)
-    backup_result = create_backup(connection, backup_file_path, device['hostname'])
-    
+    #backup_file_path = get_backup_file_path(device['hostname'], timestamp)
+    #create_backup(connection, backup_file_path, device['hostname'])
+    cdp_info = get_cdp(connection,device['hostname'])
     disconnect_from_device(connection, device['hostname'])
-
 
 def main(*args):
     # This is a main function
