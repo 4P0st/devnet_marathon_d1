@@ -1,0 +1,3 @@
+hostname,ip,username,password,device_type,port
+csr100v-01,ios-xe-mgmt.cisco.com,developer,C1sco12345,cisco_ios,8181
+csr100v-02,ios-xe-mgmt-latest.cisco.com,developer,C1sco12345,cisco_ios,8181
